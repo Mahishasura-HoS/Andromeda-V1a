@@ -13,17 +13,7 @@ import os
 import time
 from colorama import Fore, Style
 import getpass
-import mysql.connector
-import psycopg2
 
-import sys
-import os
-import time
-from colorama import Fore, Style
-import getpass
-import json
-import mysql.connector
-import psycopg2
 
 USER_DATA_FILE = "users.json"
 DATABASE_CONFIG_FILE = "database_config.json"
@@ -40,7 +30,7 @@ def load_users():
     """Loads user data from the JSON file."""
     try:
         with open(USER_DATA_FILE, 'r') as f:
-            return json.load(f)
+            return 'json.load(f)'
     except FileNotFoundError:
         return {}
     except json.JSONDecodeError:
@@ -52,46 +42,6 @@ def save_users(users):
     """Saves user data to the JSON file."""
     with open(USER_DATA_FILE, 'w') as f:
         json.dump(users, f, indent=4)
-
-
-def load_database_config():
-    """Loads database configuration from the JSON file."""
-    try:
-        with open(DATABASE_CONFIG_FILE, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print(Fore.YELLOW + f"Warning: Configuration file '{DATABASE_CONFIG_FILE}' not found." + Style.RESET_ALL)
-        return {}
-    except json.JSONDecodeError:
-        print(
-            Fore.YELLOW + f"Warning: Configuration file '{DATABASE_CONFIG_FILE}' contains invalid JSON." + Style.RESET_ALL)
-        return {}
-
-
-def connect_to_db(db_config):
-    """Connects to the specified database based on the configuration."""
-    db_type = db_config.get("type")
-    host = db_config.get("host")
-    user = db_config.get("user")
-    password = db_config.get("password")
-    database = db_config.get("database")
-
-    try:
-        if db_type == "mysql":
-            mydb = mysql.connector.connect(host=host, user=user, password=password, database=database)
-            print(Fore.GREEN + f"Connected to MySQL: {database}@{host}" + Style.RESET_ALL)
-            return mydb
-        elif db_type == "postgresql":
-            conn = psycopg2.connect(host=host, database=database, user=user, password=password)
-            print(Fore.GREEN + f"Connected to PostgreSQL: {database}@{host}" + Style.RESET_ALL)
-            return conn
-        else:
-            print(Fore.RED + f"Error: Database type '{db_type}' not supported." + Style.RESET_ALL)
-            return None
-    except Exception as e:
-        print(Fore.RED + f"Error connecting to the database: {e}" + Style.RESET_ALL)
-        return None
-
 
 def create_account():
     """Creates a new user account."""
@@ -123,7 +73,6 @@ def create_account():
             print(Fore.RED + "Passwords do not match. Please try again." + Style.RESET_ALL)
             time.sleep(1)
         print("-" * 30)
-
 
 def login():
     """Handles the login process."""
@@ -180,82 +129,6 @@ def login_menu():
             time.sleep(1)
 
 
-def choose_database():
-    """Allows the user to choose a database from the configuration."""
-    config = load_database_config()
-    if not config:
-        return None
-
-    db_options = list(config.keys())
-    if not db_options:
-        print(Fore.YELLOW + "Warning: No database configurations found." + Style.RESET_ALL)
-        return None
-
-    while True:
-        clear_screen()
-        print(Fore.CYAN + Style.BRIGHT + "Choose Database" + Style.RESET_ALL)
-        print(Fore.WHITE + "-------------------------" + Style.RESET_ALL)
-        for i, db_name in enumerate(db_options):
-            print(Fore.BLUE + f"[{i + 1}] {db_name}" + Style.RESET_ALL)
-        print(Fore.YELLOW + "[B] Back to Setup Menu" + Style.RESET_ALL)
-
-        choice = input(Fore.YELLOW + "Enter your choice: " + Style.RESET_ALL).strip().lower()
-
-        if choice.isdigit():
-            index = int(choice) - 1
-            if 0 <= index < len(db_options):
-                selected_db_name = db_options[index]
-                return config[selected_db_name]
-            else:
-                print(Fore.RED + "Invalid choice." + Style.RESET_ALL)
-                time.sleep(1)
-        elif choice == 'b':
-            return None
-        else:
-            print(Fore.RED + "Invalid choice." + Style.RESET_ALL)
-            time.sleep(1)
-
-
-def database_menu():
-    """Menu specifically for database connection."""
-    global CURRENT_DB_CONNECTION
-    while True:
-        clear_screen()
-        print(Fore.CYAN + Style.BRIGHT + "Database Setup" + Style.RESET_ALL)
-        print(Fore.WHITE + "-------------------------" + Style.RESET_ALL)
-        if CURRENT_DB_CONNECTION:
-            print(
-                Fore.GREEN + f"Connected to: {CURRENT_DB_CONNECTION.get_server_info() if hasattr(CURRENT_DB_CONNECTION, 'get_server_info') else 'Database'}" + Style.RESET_ALL)
-        else:
-            print(Fore.YELLOW + "Not connected to any database." + Style.RESET_ALL)
-        print(Fore.BLUE + '''
-        [1] Connect to Database
-        [2] Disconnect Database
-        [3] Back to Setup Menu
-        ''' + Style.RESET_ALL)
-
-        choice = input(Fore.YELLOW + "Enter your choice: " + Style.RESET_ALL).strip()
-
-        if choice == '1':
-            db_config = choose_database()
-            if db_config:
-                CURRENT_DB_CONNECTION = connect_to_db(db_config)
-        elif choice == '2':
-            if CURRENT_DB_CONNECTION:
-                CURRENT_DB_CONNECTION.close()
-                CURRENT_DB_CONNECTION = None
-                print(Fore.YELLOW + "Disconnected from the database." + Style.RESET_ALL)
-                time.sleep(1)
-            else:
-                print(Fore.YELLOW + "Not connected to any database." + Style.RESET_ALL)
-                time.sleep(1)
-        elif choice == '3':
-            return True  # Go back to setup menu
-        else:
-            print(Fore.RED + "Invalid choice." + Style.RESET_ALL)
-            time.sleep(1)
-
-
 def more_menu():
     """Placeholder for a 'more' menu."""
     clear_screen()
@@ -285,10 +158,9 @@ def main_starter_menu():
         print(Fore.WHITE + '                             SETUP MENU                                           ')
         print(Fore.WHITE + '------------------------------------------------------------------------------')
         print(Fore.BLUE + '''
-           [1] Login                         
-           [2] Data Base Setup                  
-           [3] More Options
-           [4] Test
+           [1] Login                                          
+           [2] More Options
+           [3] Test
 
            [99] Exit             
             ''' + Style.RESET_ALL)
@@ -301,15 +173,12 @@ def main_starter_menu():
                 if login_menu():
                     print(Fore.GREEN + "\nReturning to Setup Menu after login." + Style.RESET_ALL)
                     input('Press Enter to continue...')
+
             elif choice == "2":
-                if database_menu():
-                    print(Fore.GREEN + "\nReturning to Setup Menu after database setup." + Style.RESET_ALL)
-                    input('Press Enter to continue...')
-            elif choice == "3":
                 if more_menu():
                     print(Fore.GREEN + "\nReturning to Setup Menu after more options." + Style.RESET_ALL)
                     input('Press Enter to continue...')
-            elif choice == "4":
+            elif choice == "3":
                 if test_menu():
                     print(Fore.GREEN + "\n Bypass all, connection to Andromeda" + Style.RESET_ALL)
                     input('Press Enter to continue...')
@@ -329,90 +198,6 @@ if __name__ == "__main__":
 def clear_screen():
     """Clears the console screen."""
     os.system('cls' if os.name == 'nt' else 'clear')
-
-def handle_database_interaction(db_connection):
-    """Example function to interact with the connected database."""
-    cursor = db_connection.cursor()
-    while True:
-        clear_screen()
-        print(Fore.CYAN + Style.BRIGHT + "Database Interaction" + Style.RESET_ALL)
-        print(Fore.WHITE + "-------------------------" + Style.RESET_ALL)
-        print(Fore.BLUE + '''
-        [1] List Data (Example)
-        [2] Perform Action (Example)
-        [3] Disconnect and Back to Main Menu
-        ''' + Style.RESET_ALL)
-
-        choice = input(Fore.YELLOW + "Enter your choice: " + Style.RESET_ALL).strip()
-
-        if choice == '1':
-            try:
-                cursor.execute("SELECT * FROM your_table_name LIMIT 10") # Replace with your actual table
-                results = cursor.fetchall()
-                print(Fore.GREEN + "\n--- Data ---" + Style.RESET_ALL)
-                for row in results:
-                    print(row)
-                input(Fore.YELLOW + "Press Enter to continue..." + Style.RESET_ALL)
-            except Exception as e:
-                print(Fore.RED + f"Error fetching data: {e}" + Style.RESET_ALL)
-                input(Fore.YELLOW + "Press Enter to continue..." + Style.RESET_ALL)
-        elif choice == '2':
-            print(Fore.YELLOW + "Performing action on the database..." + Style.RESET_ALL)
-            time.sleep(1)
-            # Add your database modification code here (INSERT, UPDATE, DELETE)
-            # Remember to commit changes: db_connection.commit()
-            input(Fore.YELLOW + "Action performed (placeholder). Press Enter to continue..." + Style.RESET_ALL)
-        elif choice == '3':
-            break
-        else:
-            print(Fore.RED + "Invalid choice." + Style.RESET_ALL)
-            time.sleep(1)
-
-    cursor.close()
-    return True
-
-def database_menu():
-    """Menu specifically for database connection and interaction."""
-    global CURRENT_DB_CONNECTION
-    while True:
-        clear_screen()
-        print(Fore.CYAN + Style.BRIGHT + "Database Management" + Style.RESET_ALL)
-        print(Fore.WHITE + "-------------------------" + Style.RESET_ALL)
-        if CURRENT_DB_CONNECTION:
-            print(Fore.GREEN + "Connected to a database." + Style.RESET_ALL)
-        else:
-            print(Fore.YELLOW + "Connect to your database." + Style.RESET_ALL)
-        print(Fore.BLUE + '''
-        [1] Connect to Database
-        [2] Interact with Database (if connected)
-        [3] Back to Main Menu
-        ''' + Style.RESET_ALL)
-
-        choice = input(Fore.YELLOW + "Enter your choice: " + Style.RESET_ALL).strip()
-
-        if choice == '1':
-            db_config = choose_database()
-            if db_config:
-                CURRENT_DB_CONNECTION = connect_to_db(db_config)
-        elif choice == '2':
-            if CURRENT_DB_CONNECTION:
-                handle_database_interaction(CURRENT_DB_CONNECTION)
-            else:
-                print(Fore.YELLOW + "Please connect to a database first." + Style.RESET_ALL)
-                time.sleep(1)
-        elif choice == '3':
-            if CURRENT_DB_CONNECTION:
-                CURRENT_DB_CONNECTION.close()
-                CURRENT_DB_CONNECTION = None
-                print(Fore.YELLOW + "Disconnected from the database." + Style.RESET_ALL)
-                time.sleep(1)
-            return True
-        else:
-            print(Fore.RED + "Invalid choice." + Style.RESET_ALL)
-            time.sleep(1)
-
-if __name__ == "__main__":
-    database_menu()
 
 def clear_screen():
     """Clears the console screen."""
